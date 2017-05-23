@@ -8,7 +8,7 @@ public class CommandLineArguments {
     public String textPath;
 
     @Parameter(names = { "--keyspace" }, description = "Grakn keyspace")
-    public String keyspace = "text_to_grakn";
+    public String keyspace = "text_to_grakn_default_keyspace";
 
     @Parameter(names = { "--grakn-uri" }, description = "Grakn URI")
     public String graknUri = Grakn.DEFAULT_URI;

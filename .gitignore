@@ -9,6 +9,8 @@
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries
+dependency-reduced-pom.xml
+*.iml
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/

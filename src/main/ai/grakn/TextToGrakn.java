@@ -6,6 +6,7 @@ import com.beust.jcommander.JCommander;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -35,20 +36,15 @@ public class TextToGrakn {
         }
         RelationExtractor relationExtractor = new RelationExtractor(reader);
         GraknSession session = Grakn.session(commandLineArguments.graknUri, commandLineArguments.keyspace);
-        session.open(GraknTxType.WRITE).clear();
-        log.info("Clearing graph");
         GraknDAO graknDAO = new GraknDAO(session);
         log.info("Initializing new graph");
-        graknDAO.init();
-        ExecutorService exec = Executors.newFixedThreadPool(10);
-        while (relationExtractor.hasNext()) {
-            RelationTriple nextRelation = relationExtractor.next();
-            exec.submit(() -> graknDAO.insertRelation(nextRelation));
+        boolean initialized = graknDAO.init();
+        if (!initialized) {
+            log.error("Could not initialize graph, terminating");
+            System.exit(-1);
         }
-        try {
-            exec.awaitTermination(2, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            log.error("Interrupted, terminatig before work was over.");
+        while (relationExtractor.hasNext()) {
+            graknDAO.insertRelation(relationExtractor.next());
         }
         graknDAO.close();
     }

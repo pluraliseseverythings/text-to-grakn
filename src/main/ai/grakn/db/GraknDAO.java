@@ -30,8 +30,12 @@ public class GraknDAO {
         this.session = session;
     }
 
-    public void init() {
+    public boolean init() {
         this.graph = session.open(GraknTxType.WRITE);
+        if (this.graph.isClosed()) {
+            log.error("Graph is closed, pick a different key space from {}", graph.getKeyspace());
+            return false;
+        }
         this.sentenceEntity = graph.putEntityType("sentence-entity");
         this.entityName = graph.putResourceType("entity-name", ResourceType.DataType.STRING);
         this.sentenceEntity.resource(entityName);
@@ -46,6 +50,7 @@ public class GraknDAO {
                 .relates(rObject);
         this.relationType.resource(relationshipName);
         this.initialized = true;
+        return true;
     }
 
     public void insertRelation(RelationTriple relation) {
